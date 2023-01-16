@@ -1,3 +1,5 @@
+#READ PAPER: https://www.researchgate.net/publication/367180753_Intersectionality_in_the_Autism_Quotient_A_Bayesian_Explanatory_Item_Response_Theory_Analysis
+
 library(bayesplot)
 library(rjags)
 library(rethinking)
