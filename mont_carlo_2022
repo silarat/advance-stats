@@ -1,6 +1,9 @@
+
 #CODE for Monte Carlo Simulation Final Project: EDPSY 595 Autumn 2022
 #Relative Importance in the context of UX Research
 #Palmy Chomchat Silarat
+
+#READ PAPER: https://www.researchgate.net/publication/367180583_Relative_Importance_Indices_in_the_Context_of_User_Experience_Research_A_Simulation_Study
 
 library(lavaan)
 library(relaimpo)
