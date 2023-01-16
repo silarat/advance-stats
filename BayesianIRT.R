@@ -237,7 +237,7 @@ write.csv(post3,"~/Desktop/Academia/RI/mod/posterior3.csv", row.names = TRUE)
 conditional_effects(fit_mod3, "gender")
 conditional_effects(fit_mod3, "race")
 conditional_effects(fit_mod3, "socint:race")
-
+ 
 table_coef_mod3 <- fit_mod3 %>%
   gather_draws(b_Intercept, b_genderNonMmale, b_raceWhite, b_socint1) %>%
   median_qi()
