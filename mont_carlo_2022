@@ -1,0 +1,144 @@
+#CODE for Monte Carlo Simulation Final Project: EDPSY 595 Autumn 2022
+#Relative Importance in the context of UX Research
+#Palmy Chomchat Silarat
+
+library(lavaan)
+library(relaimpo)
+options(scipen = 100)
+
+####Code for Conditions####------------
+#1. expu and exdat uncorrelated, standard variance
+sim1 <- 'rscore ~~ 0*age
+        rscore ~~ 0*income
+        rscore ~~ 0.2*expu
+        rscore ~~ 0.5*exdat
+        
+        age ~~ 0.7*income
+        age ~~ 0.2*expu
+        age ~~ 0.2*exdat
+        
+        income ~~ 0.3*expu
+        income ~~ 0.5*exdat
+        
+        exdat ~~ 0*expu
+        
+        rscore ~~ 1*rscore
+        age ~~ 1*age
+        income ~~ 1*income
+        expu ~~ 1*expu
+        exdat ~~ 1*exdat'
+
+#2. expu and exdat highly correlated, standard variance
+
+sim2 <- 'rscore ~~ 0*age
+        rscore ~~ 0*income
+        rscore ~~ 0.2*expu
+        rscore ~~ 0.5*exdat
+        
+        age ~~ 0.7*income
+        age ~~ 0.5*expu
+        age ~~ 0.5*exdat
+        
+        income ~~ 0.3*expu
+        income ~~ 0.5*exdat
+        
+        exdat ~~ 0.8*expu
+        
+        rscore ~~ 1*rscore
+        age ~~ 1*age
+        income ~~ 1*income
+        expu ~~ 1*expu
+        exdat ~~ 1*exdat'
+
+#3. expu and exdat uncorrelated; age, expu, and exdat have very large variance
+sim3 <- 'rscore ~~ 0*age
+        rscore ~~ 0*income
+        rscore ~~ 0.2*expu
+        rscore ~~ 0.5*exdat
+        
+        age ~~ 0.7*income
+        age ~~ 0.5*expu
+        age ~~ 0.5*exdat
+        
+        income ~~ 0.3*expu
+        income ~~ 0.5*exdat
+        
+        exdat ~~ 0*expu
+        
+        rscore ~~ 1*rscore
+        age ~~ 100*age
+        income ~~ 1*income
+        expu ~~ 100*expu
+        exdat ~~ 100*exdat'
+
+
+#4. expu and exdat highly correlated; age, expu, and exdat have very large variance
+sim4 <- 'rscore ~~ 0*age
+        rscore ~~ 0*income
+        rscore ~~ 0.5*expu
+        rscore ~~ 0.5*exdat
+        
+        age ~~ 0.7*income
+        age ~~ 0.5*expu
+        age ~~ 0.5*exdat
+        
+        income ~~ 0.3*expu
+        income ~~ 0.5*exdat
+        
+        exdat ~~ 0.8*expu
+        
+        rscore ~~ 1*rscore
+        age ~~ 100*age
+        income ~~ 1*income
+        expu ~~ 100*expu
+        exdat ~~ 100*exdat'
+
+####Code for simulation####------------
+
+set.seed(859)
+n <- 1000 #can also be changed to other sample sizes mentioned in the paper
+
+#simulation - change sim1 to other conditions as needed
+d1 <- simulateData(model=sim1, sample.nobs=n, skewness=c(0,0,2,0, 0), kurtosis=c(3, 3, 8, 3, 3))
+
+rscore <- d1[,1] ##extracts predictors for future manipulation
+age <- d1[,2]
+income <- d1[,3]
+expu <- d1[,4]
+exdat <- d1[,5]
+
+cor(d1) #quality check
+
+#simulate binary variable separately
+dashver <- c(rep(1, n/2), rep(0, n/2)) 
+mean(dashver) 
+
+#coefficients in the population (educated assumption)
+int <- 0.5
+b1 <- 1
+b2 <- -0.6
+b3 <- 0.05
+b4 <- 0.2
+b5 <- 0.2
+b6 <- 0.2
+
+set.seed(165)
+e <- rnorm(n, mean=0, sd=1) #error must be normally distributed
+
+#simulate the outcome variable 
+userscore <- int + b1*rscore + b2*age + b3*income + b4*expu + b5 * exdat + b6*dashver + e
+
+
+####Code for Analysis####------------
+
+dashver <- as.factor(dashver) #make sure that R reads this variable as a factor
+
+#run the linear model
+model <- lm(userscore ~ age + rscore + income + expu + exdat + dashver )
+
+#examine results
+summary(model)
+
+#assess relative importance using relaimpo----
+crf <- calc.relimp(model, type = c("lmg", "last", "betasq"), rela = TRUE )
+crf
